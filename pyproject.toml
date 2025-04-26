@@ -1,0 +1,20 @@
+[project]
+name = "md-merge"
+version = "0.1.0"
+description = "A tool to merge multiple Markdown files."
+readme = "README.md"
+authors = [{ name = "difegam", email = "difegam3@gmail.com" }]
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.scripts]
+md-merge = "md_merge.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
