@@ -33,8 +33,6 @@ mdmerge --dir my_project --verbose
 md-merge --help
 ```
 
-
-```
 ## Features
 - Merges specified files or all .md files in a directory.
 - Inserts a separator between files showing the source path.
