@@ -1,0 +1,79 @@
+# Ruff configuration file
+
+line-length = 100
+indent-width = 4
+target-version = "py312"
+show-fixes = true
+extend-exclude = [".venv", "logs", "__pycache__", "build", "dist"]
+src = ["src", "tests"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+
+[lint]
+preview = true
+
+# Enable rules https://docs.astral.sh/ruff/rules/
+select = [
+    "ANN",  # annotations
+    "ARG",  # Arguments
+    "B",    # bugbear
+    "BLE",  # blind-except
+    "C4",   # comprehensions
+    "D200", # fits-on-one-line
+    "D201", # no-blank-line-before-function
+    "D204", # one-blank-line-after-class
+    "D205", # blank-line-after-summary
+    "D210", # no-space-after-docstring-summary
+    "D211", # surrounding-whitespace
+    "D300", # triple-single-quotes
+    "D400", # ends-in-period
+    "D403", # first-line-capitalized
+    "D404", # docstring-starts-with-this
+    "D419", # empty-docstring
+    "DTZ",  # naive datetime
+    "ERA",  # commented-out-code
+    "E",    # style errors
+    "EXE",  # shebang
+    "F",    # Pyflakes
+    "G010", # logging-warn
+    "I",    # Isort
+    "ICN",  # import-conventions.
+    "INP",  # implicit-namespace-package
+    "ISC",  # string concatenation
+    "LOG",  # logging
+    "N",    # naming
+    "PERF", # performance
+    "PGH",  # pygrep-hooks
+    "PIE",  # miscellaneous
+    "PL",   # pylint
+    "PTH",  # use-pathlib
+    "Q",    # quotes
+    "RET",  # unnecessary-return
+    "RSE",  # raise
+    "RUF",  # Ruff
+    "S",    # security
+    "SIM",  # simplify
+    "T20",  # print statements
+    "TCH",  # type-checking
+    "TID",  # tidy imports
+    "UP",   # upgrade
+    "W",    # style warnings
+    "YTT",  # sys.version
+]
+ignore = ["BLE001"]
+fixable = ["ALL"]
+unfixable = []
+
+[lint.per-file-ignores]
+"tests/*.py" = ["S101"]      # Use of `assert` detected
+"src/__init__.py" = ["D104"]
+
+[lint.isort]
+known-third-party = ["REPLACE_PACKAGE_NAME"]

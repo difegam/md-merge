@@ -46,7 +46,6 @@ md-merge --help
 
 
 ## Future Improvements
-- markdown formatting (mdformat)
 - Add support for custom separators.
 - Implement a GUI for easier file selection.
 - Support for other file formats (e.g., .txt, .rst).
