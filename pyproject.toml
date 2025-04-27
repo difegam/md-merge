@@ -1,6 +1,6 @@
 [project]
 name = "md-merge"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python tool designed to take a list of Markdown files and merge them into a single document."
 readme = "README.md"
 authors = [{ name = "difegam", email = "difegam3@gmail.com" }]
