@@ -1,6 +1,7 @@
 """Handles file and directory path operations."""
 
 import logging
+from enum import Enum
 from pathlib import Path
 
 from md_merge.exceptions import (
@@ -13,6 +14,16 @@ from md_merge.exceptions import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class MergeType(Enum):
+    """Enum for merge options."""
+
+    FILES = "files"
+    DIRECTORY = "directory"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 def find_markdown_files(directory: Path) -> list[Path]:
@@ -29,9 +40,7 @@ def find_markdown_files(directory: Path) -> list[Path]:
 
         # Debug logging for found files
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug(
-                f"Found markdown files: {'\n'.join([f'- {file!s}' for file in markdown_files])}"
-            )
+            logger.debug(f"Found markdown files: {'\n'.join([f'- {file!s}' for file in md_files])}")
 
         return md_files
 
@@ -46,7 +55,19 @@ def validate_inputs(files: list[Path], directory: Path) -> None:
         raise ValueError("Cannot specify both individual files and a directory.")
     if not files and not directory:
         raise ValueError("Must specify either individual files or a directory.")
+
     logger.debug("Input validation passed.")
+
+
+def select_merge_type(files: list[Path], directory: Path) -> MergeType:
+    """Determine the merge type based on user input."""
+    if files:
+        logger.debug("Merge type selected: FILES")
+        return MergeType.FILES
+    if directory:
+        logger.debug("Merge type selected: DIRECTORY")
+        return MergeType.DIRECTORY
+    raise ValueError("No valid merge type found. Please specify files or a directory.")
 
 
 def validate_input_directory(directory: Path) -> None:
@@ -73,4 +94,3 @@ def validate_input_files(files: list[Path]) -> None:
             raise NotMarkdownFileError(f"Input file is not a markdown file: {file_path}")
         logger.debug(f"  - Validated: {file_path}")
     logger.debug("All input file paths are valid.")
-

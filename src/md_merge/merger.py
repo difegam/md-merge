@@ -39,7 +39,8 @@ def merge_files(
 ) -> None:
     total_files = len(input_paths)
     logger.info(
-        f"Starting merge process. Creating '{final_document_title.title()}' from {total_files} files."
+        f"Starting merge process. Creating '{final_document_title.title()}' \
+            from {total_files} files."
     )
 
     merged_content_parts = []

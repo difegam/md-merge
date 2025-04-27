@@ -3,6 +3,7 @@
 import argparse
 import logging
 import sys
+from enum import Enum
 from pathlib import Path
 from uuid import uuid4
 
@@ -36,7 +37,7 @@ def generate_dft_output_path() -> Path:
     return Path.cwd() / f"md-merge-{uuid4()}.md"
 
 
-def create_parser() -> argparse.ArgumentParser:
+def setup_command_line_parser() -> argparse.ArgumentParser:
     """Create and configure the argument parser.
 
     Returns:
@@ -81,13 +82,36 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> int:
-    """Execute the main CLI logic.
+class ErrorCode(Enum):
+    """Enum for error codes."""
 
-    Returns:
-        int: Exit code
-    """
-    parser = create_parser()
+    SUCCESS = 0
+    VALIDATION_ERROR = 1
+    FILE_DIRECTORY_ERROR = 2
+    FILE_PROCESSING_ERROR = 3
+    APPLICATION_ERROR = 4
+    UNEXPECTED_ERROR = 10
+
+
+error_messages = {
+    ErrorCode.SUCCESS: "Success",
+    ErrorCode.VALIDATION_ERROR: "Validation error occurred. {error}",
+    ErrorCode.FILE_DIRECTORY_ERROR: "File/directory error occurred. {error}",
+    ErrorCode.FILE_PROCESSING_ERROR: "Error processing file. {error}",
+    ErrorCode.APPLICATION_ERROR: "Application error occurred. {error}",
+    ErrorCode.UNEXPECTED_ERROR: "An unexpected error occurred. {error}",
+}
+
+
+def exit_on_cli_error(error_code: ErrorCode, error: Exception) -> None:
+    logger.error(error_messages[error_code].format(error=error), exc_info=False)
+    sys.exit(error_code.value)
+
+
+def main() -> None:
+    """Main function to handle command-line arguments and execute the merging process."""
+    # Set up the argument parser
+    parser = setup_command_line_parser()
     args = parser.parse_args()
 
     # Set up logging based on verbosity
@@ -96,46 +120,42 @@ def main() -> int:
     input_paths: list[Path] = []
 
     try:
-        # --- Input Validation ---
+        # Validate inputs
         file_handler.validate_inputs(args.files, args.directory)
 
-        # --- Determine Mode and Get Input Paths ---
-        if args.files:
+        operation_mode = file_handler.select_merge_type(args.files, args.directory)
+
+        if operation_mode == file_handler.MergeType.FILES:
             logger.info("Mode: Explicit files")
             file_handler.validate_input_files(args.files)
             input_paths = args.files
-        elif args.directory:
+        elif operation_mode == file_handler.MergeType.DIRECTORY:
             logger.info("Mode: Directory")
+            file_handler.validate_input_directory(args.directory)
             input_paths = file_handler.find_markdown_files(args.directory)
-            if not input_paths:
-                logger.warning(
-                    f"No '.md' files found in directory {args.directory}. Nothing to merge."
-                )
-                return 0
 
-        # --- Perform Merge Operation ---
+        # Check if any files were found
+        if not input_paths:
+            logger.warning(f"No '.md' files found in directory {args.directory}. Nothing to merge.")
+            return
+
+        # Merge files
         merger.merge_files(input_paths, args.output)
 
     except (ValidationError, ValueError) as e:
-        logger.error(f"Validation Error: {e}", exc_info=False)
-        return 1
+        exit_on_cli_error(ErrorCode.VALIDATION_ERROR, e)
     except (FileNotFoundError, NotAFileError, DirectoryNotFoundError, NotADirectoryError) as e:
-        logger.error(f"File/Directory Error: {e}", exc_info=False)
-        return 2
+        exit_on_cli_error(ErrorCode.FILE_DIRECTORY_ERROR, e)
     except FileProcessingError as e:
-        logger.error(f"File Processing Error: {e}", exc_info=True)
-        return 3
+        exit_on_cli_error(ErrorCode.FILE_PROCESSING_ERROR, e)
     except MdMergeError as e:  # Catch base custom error
-        logger.error(f"Application Error: {e}", exc_info=True)
-        return 4
+        exit_on_cli_error(ErrorCode.APPLICATION_ERROR, e)
     except Exception as e:  # Catch-all for unexpected errors
-        logger.critical(f"An unexpected error occurred: {e}", exc_info=True)
-        return 10
+        exit_on_cli_error(ErrorCode.UNEXPECTED_ERROR, e)
 
     logger.info("md-merge process completed successfully.")
-    print(f"Successfully merged {len(input_paths)} file(s) into {args.output}")
-    return 0
+    logger.info(f"Successfully merged {len(input_paths)} file(s) into {args.output}")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

@@ -12,9 +12,12 @@ get a logger instance for use in other modules.
 
 import logging
 import sys
+from typing import Annotated
+
+LibraryFilterList = Annotated[list[str] | None, "List of libraries to silence"]
 
 
-def setup_logging(level: int = logging.INFO) -> None:
+def setup_logging(level: int = logging.INFO, silence_libraries: LibraryFilterList = None) -> None:
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
 
@@ -33,7 +36,9 @@ def setup_logging(level: int = logging.INFO) -> None:
     root_logger.addHandler(handler)
 
     # Optionally silence overly verbose libraries if needed
-    # logging.getLogger("some_library").setLevel(logging.WARNING)
+    if silence_libraries:
+        for library in silence_libraries:
+            logging.getLogger(library).setLevel(logging.WARNING)
 
     logger = logging.getLogger(__name__)
     logger.debug(
